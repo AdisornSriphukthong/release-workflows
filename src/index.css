@@ -305,7 +305,12 @@ code {
   padding: 1px 5px;
   border-radius: 3px;
   color: var(--ink);
-  word-break: break-word;
+  /* Not `word-break: break-word`, which behaves like `overflow-wrap: anywhere`
+     and reports a min-content width of one character. Containers then shrink
+     to nothing and split short names down the middle — `lint` became lin/t on
+     a phone, `release.yml` became releas/e.yml in a table column. This breaks
+     a token only when it genuinely cannot fit on a line of its own. */
+  overflow-wrap: break-word;
 }
 
 .list {
@@ -445,6 +450,11 @@ code {
 .file-card {
   display: flex;
   flex-direction: column;
+  /* A grid item's automatic minimum size is its min-content width, so without
+     this the card refuses to shrink below the widest line of YAML it holds and
+     drags the whole page into a horizontal scroll on a phone. Zero lets the
+     track shrink; the preview inside keeps its own scrollbar. */
+  min-width: 0;
   gap: 8px;
   padding: 15px 16px;
   background: var(--surface);
