@@ -79,10 +79,9 @@ function Guide() {
           <main className="content">
             <Section id="install" title="Install">
               <p>
-                Set the four things the workflows differ on, then download
-                files that already carry them — no editing YAML afterwards. Both
-                go in <code>.github/workflows/</code> at the root of your
-                repository.
+                Set the four things the workflows differ on, then download files
+                that already carry them — no editing YAML afterwards. Both go in{" "}
+                <code>.github/workflows/</code> at the root of your repository.
               </p>
 
               <Configurator />
@@ -122,12 +121,16 @@ function Guide() {
                         kind: "comment",
                         text: "#   .github\\workflows\\release.yml",
                       },
-                      { kind: "comment", text: "#   .github\\workflows\\ci.yml" },
+                      {
+                        kind: "comment",
+                        text: "#   .github\\workflows\\ci.yml",
+                      },
                     ]}
                   />
                   <p>
-                    Both files must agree with each other, so change the settings
-                    above and copy again rather than editing one of them by hand.
+                    Both files must agree with each other, so change the
+                    settings above and copy again rather than editing one of
+                    them by hand.
                   </p>
                 </Step>
 
@@ -177,11 +180,12 @@ function Guide() {
               />
               <p>
                 The release workflow checks out{" "}
-                <strong>the release branch no matter which branch you launch
-                it from</strong>, so running it while sitting on{" "}
-                <code>{devBranch}</code> still releases{" "}
-                <code>{releaseBranch}</code>. Merge first — the workflow will not
-                pick up unmerged work.
+                <strong>
+                  the release branch no matter which branch you launch it from
+                </strong>
+                , so running it while sitting on <code>{devBranch}</code> still
+                releases <code>{releaseBranch}</code>. Merge first — the
+                workflow will not pick up unmerged work.
               </p>
             </Section>
 
@@ -209,16 +213,16 @@ function Guide() {
                   <p>
                     <code>git branch -f</code> is safe when{" "}
                     <code>{releaseBranch}</code> is an ancestor of{" "}
-                    <code>{devBranch}</code> — it
-                    moves a pointer forward rather than rewriting history. A red
-                    CI run means the release will die partway, so fix it first.
+                    <code>{devBranch}</code> — it moves a pointer forward rather
+                    than rewriting history. A red CI run means the release will
+                    die partway, so fix it first.
                   </p>
                 </Step>
 
                 <Step title="Run the workflow">
                   <p>
-                    On GitHub: <strong>Actions → Release → Run workflow</strong>,
-                    pick a bump, run. Roughly one minute end to end. The same
+                    On GitHub: <strong>Actions → Release → Run workflow</strong>
+                    , pick a bump, run. Roughly one minute end to end. The same
                     thing from a terminal, if you prefer:
                   </p>
                   <CommandBlock
@@ -248,8 +252,7 @@ function Guide() {
                 The version lives in <code>package.json</code> and is bumped by{" "}
                 <code>npm version</code> inside the workflow — always npm, even
                 on {packageManager === "npm" ? "yarn or pnpm" : packageManager}.
-                Don't edit it by
-                hand — you'd desync the file from the tags.
+                Don't edit it by hand — you'd desync the file from the tags.
               </p>
             </Section>
 
@@ -272,10 +275,10 @@ function Guide() {
               </div>
               <Note label="Why the order matters">
                 <p>
-                  The version commit and tag are created at step 4 but not pushed
-                  until step 7. If lint or the build fails, the job dies with
-                  everything still on the runner — no half-finished tag is left
-                  in the repository for someone to clean up.
+                  The version commit and tag are created at step 4 but not
+                  pushed until step 7. If lint or the build fails, the job dies
+                  with everything still on the runner — no half-finished tag is
+                  left in the repository for someone to clean up.
                 </p>
               </Note>
             </Section>
@@ -285,8 +288,7 @@ function Guide() {
                 The workflow pushes a commit back to the release branch, so your
                 local clone is now behind. Pull it down and carry the version
                 bump back into <code>{devBranch}</code>, or the two branches
-                disagree
-                about what version this is.
+                disagree about what version this is.
               </p>
               <CommandBlock
                 lines={[
@@ -306,9 +308,9 @@ function Guide() {
               />
               <p>
                 You get a tag <code>vX.Y.Z</code>, a GitHub Release with an
-                auto-generated changelog, and{" "}
-                <code>{buildDir}-vX.Y.Z.zip</code> attached — the built output,
-                ready to hand to whatever serves it.
+                auto-generated changelog, and <code>{buildDir}-vX.Y.Z.zip</code>{" "}
+                attached — the built output, ready to hand to whatever serves
+                it.
               </p>
             </Section>
 
@@ -333,10 +335,7 @@ function Guide() {
 
             <Section id="fails" title="When it fails">
               <DataTable
-                columns={[
-                  { header: "Symptom" },
-                  { header: "Cause and fix" },
-                ]}
+                columns={[{ header: "Symptom" }, { header: "Cause and fix" }]}
                 rows={failures.map((f) => [f.symptom, f.cause])}
               />
               <Note label="Don't delete a published tag" tone="stop">
