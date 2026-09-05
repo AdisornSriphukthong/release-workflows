@@ -1,42 +1,19 @@
 import { useState } from "react";
+import { useConfig } from "./config-context";
 import {
-  DEFAULT_CONFIG,
   WORKFLOW_FILES,
+  withoutComments,
   type PackageManager,
-  type WorkflowConfig,
 } from "../content/workflow-templates";
 
 const MANAGERS: PackageManager[] = ["npm", "yarn", "pnpm"];
 
-/**
- * Downloads text the browser never fetched, by handing it a temporary object
- * URL. Revoked on the next frame — the click has already been dispatched by
- * then, and holding the blob would leak it for the life of the page.
- */
-function downloadText(filename: string, text: string) {
-  const url = URL.createObjectURL(
-    new Blob([text], { type: "text/yaml;charset=utf-8" }),
-  );
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  requestAnimationFrame(() => URL.revokeObjectURL(url));
-}
+type CopyState = "idle" | "copied" | "failed";
+type PreviewMode = "short" | "full";
 
-/**
- * Picks the four settings the workflows differ on, then hands over files that
- * already carry them. The alternative — shipping one generic file and listing
- * what to edit — makes every reader repeat the same four edits by hand.
- */
+/** Picks the four settings the workflows differ on. */
 export function Configurator() {
-  const [config, setConfig] = useState<WorkflowConfig>(DEFAULT_CONFIG);
-  const [preview, setPreview] = useState<string | null>(null);
-
-  const update = <K extends keyof WorkflowConfig>(
-    key: K,
-    value: WorkflowConfig[K],
-  ) => setConfig((prev) => ({ ...prev, [key]: value }));
+  const { config, update } = useConfig();
 
   return (
     <div className="config">
@@ -121,41 +98,91 @@ export function Configurator() {
       </div>
 
       <div className="files">
-        {WORKFLOW_FILES.map((file) => {
-          const content = file.build(config);
-          const isOpen = preview === file.name;
-          return (
-            <div key={file.name} className="file-card">
-              <div className="file-head">
-                <span className="file-name">{file.name}</span>
-                <span className="file-actions">
-                  <button
-                    type="button"
-                    className="btn btn--primary"
-                    onClick={() => downloadText(file.name, content)}
-                  >
-                    Download
-                  </button>
-                  <button
-                    type="button"
-                    className="btn"
-                    aria-expanded={isOpen}
-                    onClick={() => setPreview(isOpen ? null : file.name)}
-                  >
-                    {isOpen ? "Hide" : "Preview"}
-                  </button>
-                </span>
-              </div>
-              <p className="file-summary">{file.summary}</p>
-              {isOpen && (
-                <pre className="file-preview" tabIndex={0}>
-                  {content}
-                </pre>
-              )}
-            </div>
-          );
-        })}
+        {WORKFLOW_FILES.map((file) => (
+          <WorkflowFile
+            key={file.name}
+            name={file.name}
+            summary={file.summary}
+            full={file.build(config)}
+          />
+        ))}
       </div>
+    </div>
+  );
+}
+
+function WorkflowFile({
+  name,
+  summary,
+  full,
+}: {
+  name: string;
+  summary: string;
+  full: string;
+}) {
+  const [mode, setMode] = useState<PreviewMode>("short");
+  const [copied, setCopied] = useState<CopyState>("idle");
+
+  // Short is the same file with its commentary removed, never a second
+  // version of it — so what you read is always what you copy.
+  const shown = mode === "short" ? withoutComments(full) : full;
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(shown);
+      setCopied("copied");
+    } catch {
+      setCopied("failed");
+    }
+    setTimeout(() => setCopied("idle"), 2200);
+  };
+
+  const copyLabel =
+    copied === "copied"
+      ? "Copied"
+      : copied === "failed"
+        ? "Select and copy"
+        : `Copy ${mode}`;
+
+  return (
+    <div className="file-card">
+      <div className="file-head">
+        <span className="file-name">{name}</span>
+        <span className="file-actions">
+          <div className="toggle toggle--sm" role="group" aria-label="Detail">
+            {(["short", "full"] as PreviewMode[]).map((option) => (
+              <button
+                key={option}
+                type="button"
+                className="toggle-option"
+                aria-pressed={mode === option}
+                onClick={() => setMode(option)}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className={`btn btn--primary${copied === "copied" ? " btn--done" : ""}`}
+            onClick={copy}
+          >
+            {copyLabel}
+          </button>
+        </span>
+      </div>
+
+      <p className="file-summary">
+        {summary}{" "}
+        <span className="file-meta">
+          {shown.split("\n").length} lines
+          {mode === "short" && " · comments stripped"}
+        </span>
+      </p>
+
+      <pre className="file-preview" tabIndex={0} aria-label={`${name}, ${mode}`}>
+        {shown}
+      </pre>
     </div>
   );
 }

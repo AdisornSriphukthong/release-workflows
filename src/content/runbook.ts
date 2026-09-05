@@ -2,6 +2,11 @@
  * Every fact the page states, in one place — so updating the guide means
  * editing data, not hunting through markup.
  */
+import {
+  INSTALL_COMMAND,
+  runScript,
+  type WorkflowConfig,
+} from "./workflow-templates";
 
 export const project = {
   eyebrow: "GitHub Actions · Node projects",
@@ -73,80 +78,104 @@ export const bumps = [
   },
 ];
 
-/** `gate` marks a step that can fail the job and stop the release. */
-export const stages = [
-  {
-    name: "checkout",
-    note: "The release branch, full history, whatever branch you launched from.",
-    gate: false,
-  },
-  {
-    name: "install dependencies",
-    note: "Node 22, exact versions from your lockfile — npm ci, yarn install or pnpm install.",
-    gate: false,
-  },
-  {
-    name: "run lint",
-    note: "Gate — the same script CI runs on every push.",
-    gate: true,
-  },
-  {
-    name: "npm version <bump>",
-    note: "Always npm version, even on yarn or pnpm — it writes the commit and the tag itself and touches no lockfile. Local to the runner so far.",
-    gate: false,
-  },
-  {
-    name: "run build",
-    note: "Gate — whatever your build script does, with production config.",
-    gate: true,
-  },
-  {
-    name: "zip the build output",
-    note: "Becomes dist-vX.Y.Z.zip.",
-    gate: false,
-  },
-  {
-    name: "git push --follow-tags",
-    note: "First moment anything leaves the runner.",
-    gate: false,
-  },
-  {
-    name: "gh release create",
-    note: "Publishes the release with notes generated from the commits since the last tag.",
-    gate: false,
-  },
-];
+/**
+ * The pipeline, described with the commands the reader's own setup will run.
+ * Derived from the same config the YAML is generated from, so the diagram can
+ * never show an npm command to someone who picked yarn.
+ */
+export function stagesFor(config: WorkflowConfig) {
+  const pm = config.packageManager;
+  const stages: { name: string; note: string; gate: boolean }[] = [
+    {
+      name: "checkout",
+      note: `Branch ${config.releaseBranch}, full history, whatever branch you launched from.`,
+      gate: false,
+    },
+  ];
 
+  if (pm !== "npm") {
+    stages.push({
+      name: "corepack enable",
+      note: `Puts ${pm} on PATH before setup-node needs to cache its store.`,
+      gate: false,
+    });
+  }
+
+  stages.push({
+    name: INSTALL_COMMAND[pm],
+    note:
+      pm === "yarn"
+        ? "Node 22, exact versions from yarn.lock. Yarn 1 and 2+ take different flags, so the runner picks."
+        : `Node 22, exact versions from your lockfile.`,
+    gate: false,
+  });
+
+  if (config.hasLint) {
+    stages.push({
+      name: runScript(pm, "lint"),
+      note: "Gate — the same script CI runs on every push.",
+      gate: true,
+    });
+  }
+
+  stages.push(
+    {
+      name: "npm version <bump>",
+      note: "Always npm, even on yarn or pnpm — it writes the commit and the tag itself and touches no lockfile. Local to the runner so far.",
+      gate: false,
+    },
+    {
+      name: runScript(pm, "build"),
+      note: "Gate — whatever your build script does, with production config.",
+      gate: true,
+    },
+  );
+
+  if (config.attachBuild) {
+    stages.push({
+      name: `zip ${config.buildDir}/`,
+      note: `Becomes ${config.buildDir}-vX.Y.Z.zip.`,
+      gate: false,
+    });
+  }
+
+  stages.push(
+    {
+      name: `git push --follow-tags origin ${config.releaseBranch}`,
+      note: "First moment anything leaves the runner.",
+      gate: false,
+    },
+    {
+      name: "gh release create",
+      note: "Publishes the release with notes generated from the commits since the last tag.",
+      gate: false,
+    },
+  );
+
+  return stages;
+}
+
+/** Things the generator does not cover, which you do have to edit by hand. */
 export const adaptations = [
-  {
-    change: "Release from master",
-    where: "release.yml",
-    how: "Two places: the checkout ref, and the final git push. Update the branch list in ci.yml to match.",
-  },
-  {
-    change: "Build writes somewhere other than dist/",
-    where: "release.yml",
-    how: "The Package build output step. Change both the cd and the zip path.",
-  },
-  {
-    change: "No lint script",
-    where: "both files",
-    how: "Delete the npm run lint step. The build step stays as the gate.",
-  },
   {
     change: "Build needs an API URL or feature flag",
     where: "release.yml",
-    how: "Add it under the Build step's env, reading from a repository variable. A commented example is already there.",
+    how: "Add it under the Build step's env, reading from a repository variable. A commented example is already in place.",
   },
   {
-    change: "Project uses yarn or pnpm",
-    where: "both files",
-    how: "Set PACKAGE_MANAGER at the top of each file to yarn or pnpm. One line each; the cache, the install command and the script runner all follow it.",
-  },
-  {
-    change: "Nothing to attach to the release",
+    change: "Deploy somewhere after the release",
     where: "release.yml",
-    how: "Delete the Package build output step and the zip argument on gh release create.",
+    how: "Add a step after the release is created. It has the tag in steps.bump.outputs.version.",
+  },
+  {
+    change: "More than two branches watched by CI",
+    where: "ci.yml",
+    how: "Add them to both branch lists — push and pull_request.",
+  },
+  {
+    change: "A different Node version",
+    where: "both files",
+    how: "The node-version under setup-node. Node 22 is the current LTS.",
   },
 ];
 

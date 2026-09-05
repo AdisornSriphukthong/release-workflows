@@ -18,7 +18,7 @@ Both go in `.github/workflows/` at the root of your repository.
 
 ### Before first use
 
-Open the guide (`npm run dev`) and set four things, then download files that
+Open the guide (`npm run dev`) and set four things, then copy files that
 already carry them:
 
 | Setting | Default | What it changes |
@@ -30,6 +30,14 @@ already carry them:
 
 Two checkboxes cover the rest: whether the project has a `lint` script to gate
 on, and whether to attach the build output to the release at all.
+
+Every setting flows through the whole page, not just the YAML: pick `yarn` and
+the pipeline diagram lists `yarn install --frozen-lockfile` and a
+`corepack enable` step, and the failure table stops mentioning `npm ci`.
+
+Each file can be read **short** — the same file with its commentary stripped —
+or **full**. The copy button copies whichever you are looking at, so what you
+read is always what you get.
 
 The version bump always uses `npm version`, whichever manager you pick: npm
 ships with Node, it is the one bump command that writes both the commit and the
@@ -45,7 +53,7 @@ nowhere else.
 The YAML is not stored as YAML. Both files are built by
 [src/content/workflow-templates.ts](src/content/workflow-templates.ts):
 
-- the download buttons call those functions in the browser, and
+- the copy buttons call those functions in the browser, and
 - [scripts/write-workflows.mjs](scripts/write-workflows.mjs) renders the
   defaults into `public/workflows/` before every `dev` and `build`, so the two
   files also have stable URLs you can `curl` or read without JavaScript.

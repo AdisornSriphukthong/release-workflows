@@ -434,11 +434,8 @@ code {
   grid-template-columns: 1fr;
 }
 
-@media (width >= 640px) {
-  .files {
-    grid-template-columns: 1fr 1fr;
-  }
-}
+/* One per row: each card now carries its own preview, and two columns of
+   YAML side by side is unreadable at any width. */
 
 .file-card {
   display: flex;
@@ -473,6 +470,19 @@ code {
 
 .file-summary {
   font-size: 14px;
+}
+
+.file-meta {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* The preview is the tallest thing on the page; cap it so the settings above
+   stay reachable without a long scroll back. */
+.file-preview {
+  max-height: 300px;
 }
 
 .btn {
@@ -517,6 +527,15 @@ code {
   filter: brightness(1.08);
 }
 
+/* Confirmation reads as success, not as the accent doing something new. */
+.btn--done,
+.btn--done:hover {
+  background: var(--pass);
+  border-color: var(--pass);
+  color: var(--ground);
+  filter: none;
+}
+
 /* ── Shell toggle ────────────────────────────────────────────────────── */
 .toggle {
   display: inline-flex;
@@ -553,6 +572,11 @@ code {
 .toggle-option:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+
+.toggle--sm .toggle-option {
+  font-size: 11px;
+  padding: 5px 9px;
 }
 
 /* ── Command block ───────────────────────────────────────────────────── */

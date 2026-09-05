@@ -2,9 +2,9 @@
  * The two workflow files, as functions of the reader's choices.
  *
  * Single source of truth: the copies under `public/workflows/` are generated
- * from here by `scripts/write-workflows.mjs` before every build, and the
- * download buttons call the same functions in the browser. Editing the YAML by
- * hand anywhere else would put the two out of step.
+ * from here by `scripts/write-workflows.mjs` before every build, and the copy
+ * buttons call the same functions in the browser. Editing the YAML by hand
+ * anywhere else would put the two out of step.
  */
 
 export type PackageManager = "npm" | "yarn" | "pnpm";
@@ -33,9 +33,39 @@ export const DEFAULT_CONFIG: WorkflowConfig = {
 };
 
 /**
- * Install command per manager. Yarn 1 and Yarn 2+ spell the same idea
- * differently, so that one branch is resolved on the runner rather than here.
+ * The install command each manager uses on CI — one that refuses to update the
+ * lockfile. Yarn is the odd one out: 1.x and 2+ spell the same idea
+ * differently, so that branch is resolved on the runner rather than here.
+ *
+ * Exported because the guide shows these commands too, and they must be the
+ * ones the generated files actually run.
  */
+export const INSTALL_COMMAND: Record<PackageManager, string> = {
+  npm: "npm ci",
+  yarn: "yarn install --frozen-lockfile / --immutable",
+  pnpm: "pnpm install --frozen-lockfile",
+};
+
+/** How a package.json script is run — `<manager> run <script>` for all three. */
+export function runScript(manager: PackageManager, script: string): string {
+  return `${manager} run ${script}`;
+}
+
+/**
+ * Strips whole-line comments and collapses the blank runs they leave behind,
+ * for readers who want the steps without the explanation. Only lines whose
+ * first non-space character is `#` go, so nothing inside a value is touched.
+ */
+export function withoutComments(yaml: string): string {
+  return yaml
+    .split("\n")
+    .filter((line) => !/^\s*#/.test(line))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+    .concat("\n");
+}
+
 function installStep(manager: PackageManager): string {
   if (manager === "npm") {
     return `      - name: Install dependencies

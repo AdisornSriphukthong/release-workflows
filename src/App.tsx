@@ -8,6 +8,8 @@ import {
   Steps,
 } from "./components/primitives";
 import { Configurator } from "./components/configurator";
+import { ConfigProvider } from "./components/config-provider";
+import { useConfig } from "./components/config-context";
 import { ShellProvider, ShellToggle } from "./components/shell";
 import { useActiveSection } from "./components/use-active-section";
 import {
@@ -18,14 +20,26 @@ import {
   project,
   sections,
   sectionIds,
-  stages,
+  stagesFor,
 } from "./content/runbook";
 
 export default function App() {
+  return (
+    <ConfigProvider>
+      <ShellProvider>
+        <Guide />
+      </ShellProvider>
+    </ConfigProvider>
+  );
+}
+
+function Guide() {
   const active = useActiveSection(sectionIds);
+  const { config } = useConfig();
+  const stages = stagesFor(config);
 
   return (
-    <ShellProvider>
+    <>
       <div className="page">
         <header className="masthead">
           <div className="eyebrow">{project.eyebrow}</div>
@@ -323,6 +337,6 @@ export default function App() {
           </main>
         </div>
       </div>
-    </ShellProvider>
+    </>
   );
 }
