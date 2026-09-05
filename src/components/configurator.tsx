@@ -135,6 +135,26 @@ function CopyIcon({ done }: { done: boolean }) {
   );
 }
 
+function DownloadIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width="15"
+      height="15"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M8 1.8v8.2" />
+      <polyline points="4.6 6.8 8 10.2 11.4 6.8" />
+      <path d="M2.2 12.2v1.1a1 1 0 0 0 1 1h9.6a1 1 0 0 0 1-1v-1.1" />
+    </svg>
+  );
+}
+
 function WorkflowFile({
   name,
   summary,
@@ -149,6 +169,24 @@ function WorkflowFile({
   // Always the comment-free form: it is the same file, just without the
   // commentary, and one version means what you read is what you copy.
   const shown = withoutComments(full);
+
+  // A Blob rather than a link to public/workflows/: those copies are built
+  // with the defaults, and what the reader wants is the file carrying the
+  // settings they just picked — the same text the preview and the copy button
+  // hand over.
+  const download = () => {
+    const url = URL.createObjectURL(
+      new Blob([shown], { type: "text/yaml;charset=utf-8" }),
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    // Revoking in the same tick cancels the download in Safari.
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
 
   const copy = async () => {
     try {
@@ -171,17 +209,28 @@ function WorkflowFile({
     <div className="file-card">
       <div className="file-head">
         <span className="file-name">{name}</span>
-        <button
-          type="button"
-          className={`icon-btn${copied === "copied" ? " icon-btn--done" : ""}${
-            copied === "failed" ? " icon-btn--failed" : ""
-          }`}
-          onClick={copy}
-          title={label}
-          aria-label={label}
-        >
-          <CopyIcon done={copied === "copied"} />
-        </button>
+        <div className="file-actions">
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={download}
+            title={`Download ${name}`}
+            aria-label={`Download ${name}`}
+          >
+            <DownloadIcon />
+          </button>
+          <button
+            type="button"
+            className={`icon-btn${copied === "copied" ? " icon-btn--done" : ""}${
+              copied === "failed" ? " icon-btn--failed" : ""
+            }`}
+            onClick={copy}
+            title={label}
+            aria-label={label}
+          >
+            <CopyIcon done={copied === "copied"} />
+          </button>
+        </div>
       </div>
 
       <p className="file-summary">

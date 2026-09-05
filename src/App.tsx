@@ -91,24 +91,27 @@ function Guide() {
               <ShellToggle />
 
               <Steps>
-                <Step title="Create the two files">
+                <Step title="Put the two files in place">
                   <p>
-                    Copy each file with the button beside its name and paste it
-                    into <code>.github/workflows/</code> at the root of your
-                    repository, keeping the filenames.
+                    Download each file with the arrow button beside its name,
+                    keeping the filenames, then move both out of your downloads
+                    folder into <code>.github/workflows/</code>. The copy button
+                    next to it is the alternative if you would rather paste into
+                    a new file yourself.
                   </p>
                   <PlatformCommandBlock
                     unix={[
                       { kind: "command", text: "mkdir -p .github/workflows" },
                       {
-                        kind: "comment",
-                        text: "# paste each file into its own editor tab, then save as:",
+                        kind: "command",
+                        text: "mv ~/Downloads/release.yml ~/Downloads/ci.yml .github/workflows/",
                       },
+                      { kind: "blank" },
                       {
                         kind: "comment",
-                        text: "#   .github/workflows/release.yml",
+                        text: "# both files should now be listed",
                       },
-                      { kind: "comment", text: "#   .github/workflows/ci.yml" },
+                      { kind: "command", text: "ls .github/workflows" },
                     ]}
                     windows={[
                       {
@@ -116,23 +119,26 @@ function Guide() {
                         text: "New-Item -ItemType Directory -Force .github\\workflows",
                       },
                       {
-                        kind: "comment",
-                        text: "# paste each file into its own editor tab, then save as:",
+                        kind: "command",
+                        text: "Move-Item $HOME\\Downloads\\release.yml, $HOME\\Downloads\\ci.yml .github\\workflows\\",
                       },
+                      { kind: "blank" },
                       {
                         kind: "comment",
-                        text: "#   .github\\workflows\\release.yml",
+                        text: "# both files should now be listed",
                       },
                       {
-                        kind: "comment",
-                        text: "#   .github\\workflows\\ci.yml",
+                        kind: "command",
+                        text: "Get-ChildItem .github\\workflows",
                       },
                     ]}
                   />
                   <p>
-                    Both files must agree with each other, so change the
-                    settings above and copy again rather than editing one of
-                    them by hand.
+                    If your browser saved a second copy as{" "}
+                    <code>release(1).yml</code>, the move will not find it —
+                    delete the older one first. Both files must also agree with
+                    each other, so change the settings above and download again
+                    rather than editing one of them by hand.
                   </p>
                 </Step>
 

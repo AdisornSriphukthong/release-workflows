@@ -471,6 +471,12 @@ code {
   justify-content: space-between;
 }
 
+.file-actions {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
 .file-name {
   font-family: var(--mono);
   font-size: 14px;
