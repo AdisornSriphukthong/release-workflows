@@ -1,0 +1,53 @@
+# Builds the site and publishes it to GitHub Pages.
+#
+# Pages must be set to Settings → Pages → Source: GitHub Actions. The
+# "Deploy from a branch" mode serves the repository as-is, and this repository
+# holds Vite source — index.html there points at /src/main.tsx, which no
+# browser can run.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Allow one deploy at a time; a newer push supersedes a queued one but never
+# interrupts a deploy that is already writing.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # prebuild regenerates public/workflows/ from the templates in src.
+      - run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write      # to publish the artifact
+      id-token: write   # deploy-pages authenticates with an OIDC token
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
