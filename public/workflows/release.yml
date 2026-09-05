@@ -1,0 +1,100 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Manual release for a Node project.
+#
+# Actions > Release > Run workflow, pick patch / minor / major. The job bumps
+# package.json, tags vX.Y.Z, builds, and publishes a GitHub Release with the
+# built output attached.
+#
+# BEFORE FIRST USE, check these three things:
+#   1. RELEASE BRANCH — this file says `main` in two places (the checkout `ref`
+#      and the final `git push`). Change both if you release from `master`.
+#   2. BUILD OUTPUT   — the "Package build output" step zips `dist/`. Change it
+#      if your build writes somewhere else (`build/`, `out/`, …).
+#   3. SCRIPTS        — the job runs `npm run lint` and `npm run build`. Drop
+#      the lint step if your project has no lint script.
+#
+# The workflow file must live on your repository's DEFAULT branch or the
+# "Run workflow" button never appears — workflow_dispatch reads it from there.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump (patch = 0.0.X, minor = 0.X.0, major = X.0.0)"
+        required: true
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+
+# Needed to push the version commit/tag and to create the Release.
+permissions:
+  contents: write
+
+# Two releases at once would race on the version commit.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build & publish release
+    runs-on: ubuntu-latest
+    steps:
+      # Always release from the release branch, whatever branch the workflow
+      # was launched from. fetch-depth 0 so release notes can see prior tags.
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      # Creates the version commit and annotated tag on the runner only.
+      # Nothing is pushed until the build below succeeds, so a failed build
+      # never leaves a half-finished tag behind in the repository.
+      - name: Bump version
+        id: bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          version=$(npm version "${{ inputs.bump }}" -m "chore(release): %s")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        env:
+          NODE_ENV: production
+          # Build-time config goes here. Repository variables live under
+          # Settings > Secrets and variables > Actions > Variables:
+          #
+          #   VITE_API_URL: ${{ vars.VITE_API_URL }}
+          #
+          # Anything a client bundle inlines is public once shipped, so use a
+          # variable, not a secret — and never expose a real secret here.
+        run: npm run build
+
+      - name: Package build output
+        run: cd dist && zip -r "../dist-${{ steps.bump.outputs.version }}.zip" .
+
+      - name: Push version commit and tag
+        run: git push --follow-tags origin main
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.bump.outputs.version }}" \
+            --title "${{ steps.bump.outputs.version }}" \
+            --generate-notes \
+            "dist-${{ steps.bump.outputs.version }}.zip"

@@ -1,0 +1,675 @@
+/*
+ * Design tokens.
+ *
+ * The light palette is the complete set on bare `:root`; the two blocks below
+ * only redefine tokens. A colour whose sole definition lives inside a media
+ * query never applies in the un-stamped "system" state, which is how a page
+ * ends up painting one theme's text on the other theme's ground.
+ */
+:root {
+  --ground: #f3f5f8;
+  --surface: #ffffff;
+  --surface-alt: #e9edf2;
+  --ink: #10161f;
+  --ink-soft: #4a5563;
+  --ink-faint: #798595;
+  --rule: #dce2ea;
+  --rule-strong: #c3ccd8;
+  --accent: #a05b05;
+  --accent-wash: #fbf1e1;
+  --pass: #1c7048;
+  --pass-wash: #e4f2ea;
+  --fail: #a83324;
+  --fail-wash: #f8e7e4;
+  --shadow: 0 1px 2px rgb(16 22 31 / 5%), 0 8px 24px -12px rgb(16 22 31 / 16%);
+
+  --sans: "Google Sans Flex", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  color-scheme: light;
+}
+
+/* Guarded so an explicit light choice still beats a dark OS preference. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0c1016;
+    --surface: #141a22;
+    --surface-alt: #1b222c;
+    --ink: #e8edf3;
+    --ink-soft: #a2aebc;
+    --ink-faint: #6c7784;
+    --rule: #232b36;
+    --rule-strong: #333d4b;
+    --accent: #e0a44b;
+    --accent-wash: #241b0c;
+    --pass: #4fb07c;
+    --pass-wash: #12241b;
+    --fail: #e0796a;
+    --fail-wash: #2a1714;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -12px rgb(0 0 0 / 70%);
+
+    color-scheme: dark;
+  }
+}
+
+/* Repeated so an explicit dark choice wins over a light OS preference. */
+:root[data-theme="dark"] {
+  --ground: #0c1016;
+  --surface: #141a22;
+  --surface-alt: #1b222c;
+  --ink: #e8edf3;
+  --ink-soft: #a2aebc;
+  --ink-faint: #6c7784;
+  --rule: #232b36;
+  --rule-strong: #333d4b;
+  --accent: #e0a44b;
+  --accent-wash: #241b0c;
+  --pass: #4fb07c;
+  --pass-wash: #12241b;
+  --fail: #e0796a;
+  --fail-wash: #2a1714;
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -12px rgb(0 0 0 / 70%);
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* ── Page shell ──────────────────────────────────────────────────────── */
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 52px;
+}
+
+@media (width >= 940px) {
+  .shell {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 56px;
+  }
+}
+
+/* ── Masthead ────────────────────────────────────────────────────────── */
+.masthead {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 32px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.masthead h1 {
+  margin: 0;
+  font-size: clamp(34px, 6vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.lede {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-top: 4px;
+}
+
+.chip {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  color: var(--ink-soft);
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+.chip b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.chip--live {
+  border-color: var(--pass);
+  background: var(--pass-wash);
+  color: var(--pass);
+}
+
+.chip--live b {
+  color: var(--pass);
+}
+
+/* ── Section index ───────────────────────────────────────────────────── */
+.index ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 16px;
+  border-left: 2px solid var(--rule);
+}
+
+.index a {
+  display: block;
+  padding: 5px 0 5px 14px;
+  margin-left: -2px;
+  border-left: 2px solid transparent;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.index a:hover,
+.index a:focus-visible {
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+/* Where the reader currently is. The rule the list hangs off doubles as the
+   marker, so nothing shifts when the highlight moves. */
+.index a[aria-current] {
+  color: var(--ink);
+  border-left-color: var(--accent);
+  font-weight: 500;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.index a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (width >= 940px) {
+  .index {
+    position: sticky;
+    top: 32px;
+    width: 196px;
+    flex: none;
+  }
+
+  .index ol {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+}
+
+/* ── Sections ────────────────────────────────────────────────────────── */
+.section {
+  scroll-margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.section > h2 {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+}
+
+h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--ink-soft);
+}
+
+p strong,
+li strong,
+td strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 2px;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.875em;
+  background: var(--surface-alt);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+.list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  color: var(--ink-soft);
+  max-width: 68ch;
+}
+
+.list li::marker {
+  color: var(--ink-faint);
+}
+
+/* ── Download cards ──────────────────────────────────────────────────── */
+.files {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+@media (width >= 640px) {
+  .files {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.file-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 15px 16px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  box-shadow: var(--shadow);
+}
+
+.file-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.file-name {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.file-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.file-summary {
+  font-size: 14px;
+}
+
+.btn {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1;
+  padding: 7px 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn:hover {
+  border-color: var(--ink-faint);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface);
+}
+
+:root[data-theme="dark"] .btn--primary,
+.btn--primary {
+  /* The accent is dark in light mode and light in dark mode, so the label
+     takes the opposite ground rather than a fixed white. */
+  color: var(--ground);
+}
+
+.btn--primary:hover {
+  border-color: var(--accent);
+  filter: brightness(1.08);
+}
+
+/* ── Shell toggle ────────────────────────────────────────────────────── */
+.toggle {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 3px;
+  gap: 3px;
+  background: var(--surface-alt);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+}
+
+.toggle-option {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 11px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.toggle-option:hover {
+  color: var(--ink);
+}
+
+.toggle-option[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.toggle-option:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ── Command block ───────────────────────────────────────────────────── */
+.cmd {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  box-shadow: var(--shadow);
+}
+
+.cmd pre {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+.cmd .prompt {
+  color: var(--accent);
+  user-select: none;
+}
+
+.cmd .comment {
+  color: var(--ink-faint);
+}
+
+/* ── Steps ───────────────────────────────────────────────────────────── */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  counter-reset: step;
+}
+
+.step {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.step::before {
+  counter-increment: step;
+  content: counter(step);
+  flex: none;
+  width: 30px;
+  height: 30px;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: var(--ground);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 50%;
+}
+
+.step-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Pipeline ────────────────────────────────────────────────────────── */
+.pipeline {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.stage {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 14px;
+  align-items: baseline;
+  padding: 13px 16px;
+  border-top: 1px solid var(--rule);
+}
+
+.stage:first-child {
+  border-top: none;
+}
+
+.stage-n {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+.stage-name {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.stage-note {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.stage--gate {
+  background: var(--accent-wash);
+}
+
+.stage--gate .stage-n {
+  color: var(--accent);
+}
+
+/* ── Table ───────────────────────────────────────────────────────────── */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 11px 16px;
+  border-top: 1px solid var(--rule);
+  vertical-align: top;
+  color: var(--ink-soft);
+}
+
+thead th {
+  border-top: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  background: var(--surface-alt);
+  white-space: nowrap;
+}
+
+tbody td:first-child {
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.num {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Note ────────────────────────────────────────────────────────────── */
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 15px 17px;
+  border-radius: 4px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+}
+
+.note p {
+  max-width: 66ch;
+}
+
+.note-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.note--warn {
+  border-color: var(--accent);
+  background: var(--accent-wash);
+}
+
+.note--warn .note-label {
+  color: var(--accent);
+}
+
+.note--stop {
+  border-color: var(--fail);
+  background: var(--fail-wash);
+}
+
+.note--stop .note-label {
+  color: var(--fail);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
+.footer {
+  padding-top: 28px;
+  border-top: 1px solid var(--rule);
+  font-size: 13.5px;
+  color: var(--ink-faint);
+  max-width: 68ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

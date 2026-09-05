@@ -1,0 +1,42 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Lint and build on every push and pull request, so a broken commit is caught
+# before it can be merged and turned into a release tag.
+#
+# Change the branch names below to match your repository, and drop the lint
+# step if your project has no lint script.
+# ─────────────────────────────────────────────────────────────────────────────
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+# A newer push to the same branch or PR makes the in-flight run irrelevant.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint & build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      # For a TypeScript project whose build script is `tsc -b && …`, this is
+      # the type-check too.
+      - name: Build
+        env:
+          NODE_ENV: production
+        run: npm run build
