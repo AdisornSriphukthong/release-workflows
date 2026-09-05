@@ -9,7 +9,6 @@ import {
 const MANAGERS: PackageManager[] = ["npm", "yarn", "pnpm"];
 
 type CopyState = "idle" | "copied" | "failed";
-type PreviewMode = "short" | "full";
 
 /** Picks the four settings the workflows differ on. */
 export function Configurator() {
@@ -111,6 +110,31 @@ export function Configurator() {
   );
 }
 
+function CopyIcon({ done }: { done: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width="15"
+      height="15"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {done ? (
+        <polyline points="3 8.5 6.5 12 13 4" />
+      ) : (
+        <>
+          <rect x="5.5" y="5.5" width="8" height="8" rx="1.6" />
+          <path d="M10.5 3.5V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.5" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 function WorkflowFile({
   name,
   summary,
@@ -120,12 +144,11 @@ function WorkflowFile({
   summary: string;
   full: string;
 }) {
-  const [mode, setMode] = useState<PreviewMode>("short");
   const [copied, setCopied] = useState<CopyState>("idle");
 
-  // Short is the same file with its commentary removed, never a second
-  // version of it — so what you read is always what you copy.
-  const shown = mode === "short" ? withoutComments(full) : full;
+  // Always the comment-free form: it is the same file, just without the
+  // commentary, and one version means what you read is what you copy.
+  const shown = withoutComments(full);
 
   const copy = async () => {
     try {
@@ -137,50 +160,36 @@ function WorkflowFile({
     setTimeout(() => setCopied("idle"), 2200);
   };
 
-  const copyLabel =
+  const label =
     copied === "copied"
-      ? "Copied"
+      ? `${name} copied`
       : copied === "failed"
-        ? "Select and copy"
-        : `Copy ${mode}`;
+        ? `Could not copy ${name} — select the text below instead`
+        : `Copy ${name}`;
 
   return (
     <div className="file-card">
       <div className="file-head">
         <span className="file-name">{name}</span>
-        <span className="file-actions">
-          <div className="toggle toggle--sm" role="group" aria-label="Detail">
-            {(["short", "full"] as PreviewMode[]).map((option) => (
-              <button
-                key={option}
-                type="button"
-                className="toggle-option"
-                aria-pressed={mode === option}
-                onClick={() => setMode(option)}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            className={`btn btn--primary${copied === "copied" ? " btn--done" : ""}`}
-            onClick={copy}
-          >
-            {copyLabel}
-          </button>
-        </span>
+        <button
+          type="button"
+          className={`icon-btn${copied === "copied" ? " icon-btn--done" : ""}${
+            copied === "failed" ? " icon-btn--failed" : ""
+          }`}
+          onClick={copy}
+          title={label}
+          aria-label={label}
+        >
+          <CopyIcon done={copied === "copied"} />
+        </button>
       </div>
 
       <p className="file-summary">
         {summary}{" "}
-        <span className="file-meta">
-          {shown.split("\n").length} lines
-          {mode === "short" && " · comments stripped"}
-        </span>
+        <span className="file-meta">{shown.split("\n").length} lines</span>
       </p>
 
-      <pre className="file-preview" tabIndex={0} aria-label={`${name}, ${mode}`}>
+      <pre className="file-preview" tabIndex={0} aria-label={name}>
         {shown}
       </pre>
     </div>

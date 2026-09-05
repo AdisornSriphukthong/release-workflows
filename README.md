@@ -35,9 +35,8 @@ Every setting flows through the whole page, not just the YAML: pick `yarn` and
 the pipeline diagram lists `yarn install --frozen-lockfile` and a
 `corepack enable` step, and the failure table stops mentioning `npm ci`.
 
-Each file can be read **short** — the same file with its commentary stripped —
-or **full**. The copy button copies whichever you are looking at, so what you
-read is always what you get.
+Each file is shown without its commentary — the same YAML, whole-line comments
+stripped — and the copy button next to the filename copies exactly what you see.
 
 The version bump always uses `npm version`, whichever manager you pick: npm
 ships with Node, it is the one bump command that writes both the commit and the

@@ -167,35 +167,3 @@ export function Step({ title, children }: { title: string; children: ReactNode }
     </div>
   );
 }
-
-/**
- * A downloadable workflow file. Served from `public/`, so `download` saves it
- * and a plain click opens it for reading first.
- */
-export function FileCard({
-  name,
-  href,
-  summary,
-}: {
-  name: string;
-  href: string;
-  summary: string;
-}) {
-  const url = `${import.meta.env.BASE_URL}${href}`;
-  return (
-    <div className="file-card">
-      <div className="file-head">
-        <span className="file-name">{name}</span>
-        <span className="file-actions">
-          <a className="btn btn--primary" href={url} download={name}>
-            Download
-          </a>
-          <a className="btn" href={url} target="_blank" rel="noreferrer">
-            View
-          </a>
-        </span>
-      </div>
-      <p className="file-summary">{summary}</p>
-    </div>
-  );
-}
