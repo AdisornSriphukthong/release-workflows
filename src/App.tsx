@@ -107,13 +107,37 @@ export default function App() {
                   />
                 </Step>
 
-                <Step title="Check the three settings">
+                <Step title="Pick your package manager">
                   <p>
-                    Open <code>release.yml</code>. The header comment lists what
-                    to confirm: the <strong>release branch</strong> (it says{" "}
-                    <code>main</code> in two places), the{" "}
-                    <strong>build output folder</strong> (it zips{" "}
-                    <code>dist/</code>), and whether your project has a{" "}
+                    Both files open with one setting. Leave it on{" "}
+                    <code>npm</code>, or change it — the dependency cache, the
+                    install command and the script runner all follow from it.
+                  </p>
+                  <div className="cmd">
+                    <pre>
+                      <span className="comment">
+                        {"# release.yml and ci.yml — keep the two in step\n"}
+                      </span>
+                      {"env:\n  PACKAGE_MANAGER: "}
+                      <span className="prompt">npm</span>
+                      {"   "}
+                      <span className="comment">{"# npm | yarn | pnpm"}</span>
+                    </pre>
+                  </div>
+                  <p>
+                    The version bump stays on <code>npm version</code> whichever
+                    you pick: npm ships with Node, it writes the commit and the
+                    tag itself, and it leaves <code>yarn.lock</code> and{" "}
+                    <code>pnpm-lock.yaml</code> alone.
+                  </p>
+                </Step>
+
+                <Step title="Check the other three settings">
+                  <p>
+                    Also in the header comment of <code>release.yml</code>: the{" "}
+                    <strong>release branch</strong> (it says <code>main</code> in
+                    two places), the <strong>build output folder</strong> (it
+                    zips <code>dist/</code>), and whether your project has a{" "}
                     <strong>lint script</strong>. Adjust <code>ci.yml</code>'s
                     branch names to match.
                   </p>

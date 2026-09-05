@@ -11,7 +11,7 @@ export const project = {
     { label: "files", value: "2", live: true },
     { label: "setup", value: "~5 min" },
     { label: "runtime", value: "~1 min" },
-    { label: "works with", value: "any npm project" },
+    { label: "works with", value: "npm · yarn · pnpm" },
   ],
 };
 
@@ -81,22 +81,22 @@ export const stages = [
     gate: false,
   },
   {
-    name: "npm ci",
-    note: "Node 22, exact versions from package-lock.json.",
+    name: "install dependencies",
+    note: "Node 22, exact versions from your lockfile — npm ci, yarn install or pnpm install.",
     gate: false,
   },
   {
-    name: "npm run lint",
-    note: "Gate — the same command CI runs on every push.",
+    name: "run lint",
+    note: "Gate — the same script CI runs on every push.",
     gate: true,
   },
   {
     name: "npm version <bump>",
-    note: "Commits chore(release): vX.Y.Z and tags it. Local to the runner so far.",
+    note: "Always npm version, even on yarn or pnpm — it writes the commit and the tag itself and touches no lockfile. Local to the runner so far.",
     gate: false,
   },
   {
-    name: "npm run build",
+    name: "run build",
     note: "Gate — whatever your build script does, with production config.",
     gate: true,
   },
@@ -139,9 +139,9 @@ export const adaptations = [
     how: "Add it under the Build step's env, reading from a repository variable. A commented example is already there.",
   },
   {
-    change: "Project uses pnpm or yarn",
+    change: "Project uses yarn or pnpm",
     where: "both files",
-    how: "Swap npm ci for your install command and set the matching cache in setup-node.",
+    how: "Set PACKAGE_MANAGER at the top of each file to yarn or pnpm. One line each; the cache, the install command and the script runner all follow it.",
   },
   {
     change: "Nothing to attach to the release",
@@ -157,9 +157,9 @@ export const failures = [
       "release.yml is not on the repository's default branch. workflow_dispatch reads it from there and nowhere else — merge it in and push.",
   },
   {
-    symptom: "Fails at npm ci",
+    symptom: "Fails while installing dependencies",
     cause:
-      "package-lock.json disagrees with package.json. Run npm install locally and commit the lockfile. Installing with a different package manager causes exactly this.",
+      "Your lockfile disagrees with package.json — every install command here refuses to update it. Install locally with the manager PACKAGE_MANAGER names and commit the lockfile. Mixing managers in one project causes exactly this.",
   },
   {
     symptom: "Fails at the build, works on your machine",

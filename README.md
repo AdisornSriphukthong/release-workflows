@@ -3,8 +3,9 @@
 Two GitHub Actions workflow files that turn a version bump into a tagged GitHub
 Release, plus a single-page guide explaining how to install and adapt them.
 
-Copy the workflows into any npm project. There is nothing to install and no
-third-party action beyond `actions/checkout` and `actions/setup-node`.
+Copy the workflows into any Node project — npm, yarn or pnpm. There is
+nothing to install and no third-party action beyond `actions/checkout` and
+`actions/setup-node`; yarn and pnpm come from corepack, which ships with Node.
 
 ## The workflows
 
@@ -17,15 +18,32 @@ Both go in `.github/workflows/` at the root of your repository.
 
 ### Before first use
 
-`release.yml` opens with a comment listing the three things to check:
+`release.yml` opens with a comment listing the four things to check:
 
-1. **Release branch** — the file says `main` in two places (the checkout `ref`
+1. **Package manager** — one setting near the top of each file:
+
+   ```yaml
+   env:
+     PACKAGE_MANAGER: npm   # npm | yarn | pnpm
+   ```
+
+   It drives the dependency cache, the install command (`npm ci`,
+   `yarn install --frozen-lockfile` / `--immutable`, or
+   `pnpm install --frozen-lockfile`) and how the scripts are run. Keep the two
+   files in step.
+
+2. **Release branch** — the file says `main` in two places (the checkout `ref`
    and the final `git push`). Change both if you release from `master`, and
    update the branch lists in `ci.yml` to match.
-2. **Build output** — the packaging step zips `dist/`. Change it if your build
+3. **Build output** — the packaging step zips `dist/`. Change it if your build
    writes to `build/`, `out/`, or anywhere else.
-3. **Scripts** — the job runs `npm run lint` and `npm run build`. Drop the lint
+4. **Scripts** — the job runs your `lint` and `build` scripts. Drop the lint
    step if your project has no lint script.
+
+The version bump always uses `npm version`, whichever manager you pick: npm
+ships with Node, it is the one bump command that writes both the commit and the
+tag itself, and it leaves `yarn.lock` and `pnpm-lock.yaml` untouched without
+creating a `package-lock.json`.
 
 `release.yml` must sit on your repository's **default branch** or the Run
 workflow button never appears — `workflow_dispatch` reads it from there and

@@ -2,8 +2,9 @@
 # Lint and build on every push and pull request, so a broken commit is caught
 # before it can be merged and turned into a release tag.
 #
-# Change the branch names below to match your repository, and drop the lint
-# step if your project has no lint script.
+# Set PACKAGE_MANAGER below to match release.yml, change the branch names to
+# match your repository, and drop the lint step if your project has no lint
+# script.
 # ─────────────────────────────────────────────────────────────────────────────
 name: CI
 
@@ -12,6 +13,10 @@ on:
     branches: [develop, main]
   pull_request:
     branches: [develop, main]
+
+env:
+  # One of: npm | yarn | pnpm — keep this in step with release.yml.
+  PACKAGE_MANAGER: npm
 
 # A newer push to the same branch or PR makes the in-flight run irrelevant.
 concurrency:
@@ -25,18 +30,38 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # corepack provides the yarn and pnpm binaries, and setup-node needs them
+      # on PATH before it can cache their stores.
+      - name: Enable corepack
+        if: env.PACKAGE_MANAGER != 'npm'
+        run: corepack enable
+
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
+          cache: ${{ env.PACKAGE_MANAGER }}
 
-      - run: npm ci
+      - name: Install dependencies
+        run: |
+          case "$PACKAGE_MANAGER" in
+            yarn)
+              # Yarn 1 and Yarn 2+ spell the same flag differently.
+              if [ "$(yarn --version | cut -d. -f1)" = "1" ]; then
+                yarn install --frozen-lockfile
+              else
+                yarn install --immutable
+              fi
+              ;;
+            pnpm) pnpm install --frozen-lockfile ;;
+            *)    npm ci ;;
+          esac
 
-      - run: npm run lint
+      - name: Lint
+        run: $PACKAGE_MANAGER run lint
 
       # For a TypeScript project whose build script is `tsc -b && …`, this is
       # the type-check too.
       - name: Build
         env:
           NODE_ENV: production
-        run: npm run build
+        run: $PACKAGE_MANAGER run build

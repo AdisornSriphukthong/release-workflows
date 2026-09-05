@@ -5,13 +5,14 @@
 # package.json, tags vX.Y.Z, builds, and publishes a GitHub Release with the
 # built output attached.
 #
-# BEFORE FIRST USE, check these three things:
-#   1. RELEASE BRANCH — this file says `main` in two places (the checkout `ref`
+# BEFORE FIRST USE, check these four things:
+#   1. PACKAGE MANAGER — set PACKAGE_MANAGER below to npm, yarn or pnpm.
+#   2. RELEASE BRANCH  — this file says `main` in two places (the checkout `ref`
 #      and the final `git push`). Change both if you release from `master`.
-#   2. BUILD OUTPUT   — the "Package build output" step zips `dist/`. Change it
+#   3. BUILD OUTPUT    — the "Package build output" step zips `dist/`. Change it
 #      if your build writes somewhere else (`build/`, `out/`, …).
-#   3. SCRIPTS        — the job runs `npm run lint` and `npm run build`. Drop
-#      the lint step if your project has no lint script.
+#   4. SCRIPTS         — the job runs your `lint` and `build` scripts. Drop the
+#      lint step if your project has none.
 #
 # The workflow file must live on your repository's DEFAULT branch or the
 # "Run workflow" button never appears — workflow_dispatch reads it from there.
@@ -30,6 +31,19 @@ on:
           - patch
           - minor
           - major
+
+env:
+  # ── Package manager ────────────────────────────────────────────────────────
+  # One of: npm | yarn | pnpm
+  #
+  # This single value drives the dependency cache, the install command and how
+  # the lint and build scripts are run. Nothing else in this file changes.
+  #
+  # The version bump deliberately stays on `npm version` whichever you pick:
+  # npm ships with Node, and it is the one bump command that writes both the
+  # commit and the tag itself. It leaves yarn.lock and pnpm-lock.yaml alone and
+  # does not create a package-lock.json.
+  PACKAGE_MANAGER: npm
 
 # Needed to push the version commit/tag and to create the Release.
 permissions:
@@ -52,14 +66,35 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      # corepack ships with Node and provides the yarn and pnpm binaries.
+      # It has to run before setup-node, which needs them on PATH to work out
+      # where their caches live.
+      - name: Enable corepack
+        if: env.PACKAGE_MANAGER != 'npm'
+        run: corepack enable
+
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
+          cache: ${{ env.PACKAGE_MANAGER }}
 
-      - run: npm ci
+      - name: Install dependencies
+        run: |
+          case "$PACKAGE_MANAGER" in
+            yarn)
+              # Yarn 1 and Yarn 2+ spell the same flag differently.
+              if [ "$(yarn --version | cut -d. -f1)" = "1" ]; then
+                yarn install --frozen-lockfile
+              else
+                yarn install --immutable
+              fi
+              ;;
+            pnpm) pnpm install --frozen-lockfile ;;
+            *)    npm ci ;;
+          esac
 
-      - run: npm run lint
+      - name: Lint
+        run: $PACKAGE_MANAGER run lint
 
       # Creates the version commit and annotated tag on the runner only.
       # Nothing is pushed until the build below succeeds, so a failed build
@@ -82,7 +117,7 @@ jobs:
           #
           # Anything a client bundle inlines is public once shipped, so use a
           # variable, not a secret — and never expose a real secret here.
-        run: npm run build
+        run: $PACKAGE_MANAGER run build
 
       - name: Package build output
         run: cd dist && zip -r "../dist-${{ steps.bump.outputs.version }}.zip" .
