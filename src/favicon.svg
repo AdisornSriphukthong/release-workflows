@@ -3,16 +3,15 @@
   bump into a tagged release. Drawn by hand rather than exported, so it stays
   a few hundred bytes and reads at 16px.
 
-  The badge follows the browser's theme the way the page does: amber on a pale
-  ground in light, amber on near-black in dark. Firefox and Chrome both honour
-  prefers-color-scheme inside an SVG favicon; anything that doesn't just gets
-  the light pair, which is legible either way.
+  Monochrome, like the page: a black badge in light, a white one in dark.
+  Firefox and Chrome both honour prefers-color-scheme inside an SVG favicon;
+  anything that doesn't just gets the light pair, which is legible either way.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <style>
-    :root { --badge: #a05b05; --glyph: #f6f2ea; }
+    :root { --badge: #111111; --glyph: #f2f2f2; }
     @media (prefers-color-scheme: dark) {
-      :root { --badge: #e0a44b; --glyph: #0c1016; }
+      :root { --badge: #f0f0f0; --glyph: #0b0b0b; }
     }
   </style>
   <rect width="32" height="32" rx="7" fill="var(--badge)" />

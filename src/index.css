@@ -1,5 +1,12 @@
 /*
- * Design tokens.
+ * Design tokens — a monochrome scale.
+ *
+ * With hue gone, every distinction has to be carried by lightness, weight,
+ * border or fill. So --accent is simply the strongest ink rather than a
+ * colour of its own, and --pass / --fail keep their names (dozens of rules
+ * read them) but resolve to the same neutrals; the rules that used to lean on
+ * green-versus-red now differ in shape instead. See .note--stop and
+ * .icon-btn--failed.
  *
  * The light palette is the complete set on bare `:root`; the two blocks below
  * only redefine tokens. A colour whose sole definition lives inside a media
@@ -7,21 +14,21 @@
  * ends up painting one theme's text on the other theme's ground.
  */
 :root {
-  --ground: #f3f5f8;
+  --ground: #f2f2f2;
   --surface: #ffffff;
-  --surface-alt: #e9edf2;
-  --ink: #10161f;
-  --ink-soft: #4a5563;
-  --ink-faint: #798595;
-  --rule: #dce2ea;
-  --rule-strong: #c3ccd8;
-  --accent: #a05b05;
-  --accent-wash: #fbf1e1;
-  --pass: #1c7048;
-  --pass-wash: #e4f2ea;
-  --fail: #a83324;
-  --fail-wash: #f8e7e4;
-  --shadow: 0 1px 2px rgb(16 22 31 / 5%), 0 8px 24px -12px rgb(16 22 31 / 16%);
+  --surface-alt: #e7e7e7;
+  --ink: #111111;
+  --ink-soft: #474747;
+  --ink-faint: #6e6e6e;
+  --rule: #dcdcdc;
+  --rule-strong: #b8b8b8;
+  --accent: #111111;
+  --accent-wash: #e6e6e6;
+  --pass: #111111;
+  --pass-wash: #e6e6e6;
+  --fail: #111111;
+  --fail-wash: #e6e6e6;
+  --shadow: 0 1px 2px rgb(0 0 0 / 6%), 0 8px 24px -12px rgb(0 0 0 / 18%);
 
   --sans: "Google Sans Flex", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -32,44 +39,42 @@
 /* Guarded so an explicit light choice still beats a dark OS preference. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ground: #0c1016;
-    --surface: #141a22;
-    --surface-alt: #1b222c;
-    --ink: #e8edf3;
-    --ink-soft: #a2aebc;
-    --ink-faint: #6c7784;
-    --rule: #232b36;
-    --rule-strong: #333d4b;
-    --accent: #e0a44b;
-    --accent-wash: #241b0c;
-    --pass: #4fb07c;
-    --pass-wash: #12241b;
-    --fail: #e0796a;
-    --fail-wash: #2a1714;
+    --ground: #0b0b0b;
+    --surface: #151515;
+    --surface-alt: #1f1f1f;
+    --ink: #f0f0f0;
+    --ink-soft: #b0b0b0;
+    --ink-faint: #838383;
+    --rule: #2a2a2a;
+    --rule-strong: #454545;
+    --accent: #f0f0f0;
+    --accent-wash: #242424;
+    --pass: #f0f0f0;
+    --pass-wash: #242424;
+    --fail: #f0f0f0;
+    --fail-wash: #242424;
     --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -12px rgb(0 0 0 / 70%);
-
     color-scheme: dark;
   }
 }
 
 /* Repeated so an explicit dark choice wins over a light OS preference. */
 :root[data-theme="dark"] {
-  --ground: #0c1016;
-  --surface: #141a22;
-  --surface-alt: #1b222c;
-  --ink: #e8edf3;
-  --ink-soft: #a2aebc;
-  --ink-faint: #6c7784;
-  --rule: #232b36;
-  --rule-strong: #333d4b;
-  --accent: #e0a44b;
-  --accent-wash: #241b0c;
-  --pass: #4fb07c;
-  --pass-wash: #12241b;
-  --fail: #e0796a;
-  --fail-wash: #2a1714;
+  --ground: #0b0b0b;
+  --surface: #151515;
+  --surface-alt: #1f1f1f;
+  --ink: #f0f0f0;
+  --ink-soft: #b0b0b0;
+  --ink-faint: #838383;
+  --rule: #2a2a2a;
+  --rule-strong: #454545;
+  --accent: #f0f0f0;
+  --accent-wash: #242424;
+  --pass: #f0f0f0;
+  --pass-wash: #242424;
+  --fail: #f0f0f0;
+  --fail-wash: #242424;
   --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -12px rgb(0 0 0 / 70%);
-
   color-scheme: dark;
 }
 
@@ -182,13 +187,13 @@ img {
 }
 
 .chip--live {
-  border-color: var(--pass);
-  background: var(--pass-wash);
-  color: var(--pass);
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ground);
 }
 
 .chip--live b {
-  color: var(--pass);
+  color: var(--ground);
 }
 
 /* ── Section index ───────────────────────────────────────────────────── */
@@ -214,8 +219,8 @@ img {
 
 .index a:hover,
 .index a:focus-visible {
-  color: var(--accent);
-  border-left-color: var(--accent);
+  color: var(--ink);
+  border-left-color: var(--rule-strong);
 }
 
 /* Where the reader currently is. The rule the list hangs off doubles as the
@@ -516,9 +521,10 @@ code {
 
 .icon-btn--failed,
 .icon-btn--failed:hover {
-  color: var(--fail);
-  border-color: var(--fail);
-  background: var(--fail-wash);
+  color: var(--ink);
+  border-style: dashed;
+  border-color: var(--ink);
+  background: transparent;
 }
 
 /* ── Shell toggle ────────────────────────────────────────────────────── */
@@ -761,12 +767,17 @@ tbody td:first-child {
 }
 
 .note--stop {
-  border-color: var(--fail);
+  border-color: var(--ink);
+  border-width: 2px;
   background: var(--fail-wash);
 }
 
 .note--stop .note-label {
-  color: var(--fail);
+  align-self: flex-start;
+  padding: 3px 7px;
+  border-radius: 3px;
+  background: var(--ink);
+  color: var(--ground);
 }
 
 /* ── Footer ──────────────────────────────────────────────────────────── */
