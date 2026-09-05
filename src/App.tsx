@@ -84,6 +84,8 @@ function Guide() {
                 <code>.github/workflows/</code> at the root of your repository.
               </p>
 
+              {/* cc */}
+
               <Configurator />
 
               <ShellToggle />
