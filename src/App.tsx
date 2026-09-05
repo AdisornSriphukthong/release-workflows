@@ -1,13 +1,13 @@
 import {
   CommandBlock,
   DataTable,
-  FileCard,
   Note,
   PlatformCommandBlock,
   Section,
   Step,
   Steps,
 } from "./components/primitives";
+import { Configurator } from "./components/configurator";
 import { ShellProvider, ShellToggle } from "./components/shell";
 import { useActiveSection } from "./components/use-active-section";
 import {
@@ -15,7 +15,6 @@ import {
   branches,
   bumps,
   failures,
-  files,
   project,
   sections,
   sectionIds,
@@ -63,16 +62,13 @@ export default function App() {
           <main className="content">
             <Section id="install" title="Install">
               <p>
-                Both files go in <code>.github/workflows/</code> at the root of
-                your repository. Download them, or fetch them from a terminal —
-                the shell switch below changes every command on this page.
+                Set the four things the workflows differ on, then download
+                files that already carry them — no editing YAML afterwards. Both
+                go in <code>.github/workflows/</code> at the root of your
+                repository.
               </p>
 
-              <div className="files">
-                {files.map((file) => (
-                  <FileCard key={file.name} {...file} />
-                ))}
-              </div>
+              <Configurator />
 
               <ShellToggle />
 
@@ -107,39 +103,12 @@ export default function App() {
                   />
                 </Step>
 
-                <Step title="Pick your package manager">
+                <Step title="Read the header comment">
                   <p>
-                    Both files open with one setting. Leave it on{" "}
-                    <code>npm</code>, or change it — the dependency cache, the
-                    install command and the script runner all follow from it.
-                  </p>
-                  <div className="cmd">
-                    <pre>
-                      <span className="comment">
-                        {"# release.yml and ci.yml — keep the two in step\n"}
-                      </span>
-                      {"env:\n  PACKAGE_MANAGER: "}
-                      <span className="prompt">npm</span>
-                      {"   "}
-                      <span className="comment">{"# npm | yarn | pnpm"}</span>
-                    </pre>
-                  </div>
-                  <p>
-                    The version bump stays on <code>npm version</code> whichever
-                    you pick: npm ships with Node, it writes the commit and the
-                    tag itself, and it leaves <code>yarn.lock</code> and{" "}
-                    <code>pnpm-lock.yaml</code> alone.
-                  </p>
-                </Step>
-
-                <Step title="Check the other three settings">
-                  <p>
-                    Also in the header comment of <code>release.yml</code>: the{" "}
-                    <strong>release branch</strong> (it says <code>main</code> in
-                    two places), the <strong>build output folder</strong> (it
-                    zips <code>dist/</code>), and whether your project has a{" "}
-                    <strong>lint script</strong>. Adjust <code>ci.yml</code>'s
-                    branch names to match.
+                    Each file opens with a line recording what it was generated
+                    for. If any of it looks wrong, change the settings above and
+                    download again rather than editing the YAML — the two files
+                    have to agree with each other.
                   </p>
                 </Step>
 

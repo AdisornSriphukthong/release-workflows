@@ -317,6 +317,116 @@ code {
   color: var(--ink-faint);
 }
 
+/* ── Configurator ────────────────────────────────────────────────────── */
+.config {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px;
+  background: var(--surface-alt);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+
+.config-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+}
+
+@media (width >= 560px) {
+  .config-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.field-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.input {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  min-width: 0;
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-color: var(--accent);
+}
+
+.input:disabled {
+  color: var(--ink-faint);
+  background: var(--surface-alt);
+  cursor: not-allowed;
+}
+
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.check input {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.check input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.file-preview {
+  margin: 4px 0 0;
+  padding: 12px 13px;
+  max-height: 340px;
+  overflow: auto;
+  background: var(--ground);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  white-space: pre;
+  tab-size: 2;
+}
+
+.file-preview:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
 /* ── Download cards ──────────────────────────────────────────────────── */
 .files {
   display: grid;

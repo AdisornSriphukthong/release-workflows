@@ -18,27 +18,18 @@ Both go in `.github/workflows/` at the root of your repository.
 
 ### Before first use
 
-`release.yml` opens with a comment listing the four things to check:
+Open the guide (`npm run dev`) and set four things, then download files that
+already carry them:
 
-1. **Package manager** — one setting near the top of each file:
+| Setting | Default | What it changes |
+| --- | --- | --- |
+| Package manager | `npm` | The dependency cache, the install command, and how the scripts are run. Yarn and pnpm additionally get a `corepack enable` step. |
+| Release branch | `main` | The checkout `ref`, the final `git push`, and the branch list in `ci.yml`. |
+| Working branch | `develop` | The other branch `ci.yml` watches. |
+| Build output folder | `dist` | What gets zipped onto the release. |
 
-   ```yaml
-   env:
-     PACKAGE_MANAGER: npm   # npm | yarn | pnpm
-   ```
-
-   It drives the dependency cache, the install command (`npm ci`,
-   `yarn install --frozen-lockfile` / `--immutable`, or
-   `pnpm install --frozen-lockfile`) and how the scripts are run. Keep the two
-   files in step.
-
-2. **Release branch** — the file says `main` in two places (the checkout `ref`
-   and the final `git push`). Change both if you release from `master`, and
-   update the branch lists in `ci.yml` to match.
-3. **Build output** — the packaging step zips `dist/`. Change it if your build
-   writes to `build/`, `out/`, or anywhere else.
-4. **Scripts** — the job runs your `lint` and `build` scripts. Drop the lint
-   step if your project has no lint script.
+Two checkboxes cover the rest: whether the project has a `lint` script to gate
+on, and whether to attach the build output to the release at all.
 
 The version bump always uses `npm version`, whichever manager you pick: npm
 ships with Node, it is the one bump command that writes both the commit and the
@@ -48,6 +39,19 @@ creating a `package-lock.json`.
 `release.yml` must sit on your repository's **default branch** or the Run
 workflow button never appears — `workflow_dispatch` reads it from there and
 nowhere else.
+
+### One source of truth
+
+The YAML is not stored as YAML. Both files are built by
+[src/content/workflow-templates.ts](src/content/workflow-templates.ts):
+
+- the download buttons call those functions in the browser, and
+- [scripts/write-workflows.mjs](scripts/write-workflows.mjs) renders the
+  defaults into `public/workflows/` before every `dev` and `build`, so the two
+  files also have stable URLs you can `curl` or read without JavaScript.
+
+Edit the templates, never `public/workflows/*.yml` — those are generated and
+will be overwritten.
 
 ### Why nothing is pushed early
 

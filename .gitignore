@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated from src/content/workflow-templates.ts by the prebuild script.
+public/workflows/
