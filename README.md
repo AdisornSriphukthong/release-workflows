@@ -31,9 +31,11 @@ already carry them:
 Two checkboxes cover the rest: whether the project has a `lint` script to gate
 on, and whether to attach the build output to the release at all.
 
-Every setting flows through the whole page, not just the YAML: pick `yarn` and
-the pipeline diagram lists `yarn install --frozen-lockfile` and a
-`corepack enable` step, and the failure table stops mentioning `npm ci`.
+Every setting flows through the whole page, not just the YAML. Pick `yarn` and
+name your branches `master` / `dev`, and the pipeline diagram, the branch table,
+every `git` command and the failure table all follow — `yarn install`,
+`corepack enable`, `git branch -f master dev`, `yarn.lock disagrees with
+package.json`. Nothing on the page describes a setup you did not choose.
 
 Each file is shown without its commentary — the same YAML, whole-line comments
 stripped — and the copy button next to the filename copies exactly what you see.

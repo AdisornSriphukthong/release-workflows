@@ -14,9 +14,9 @@ import { ShellProvider, ShellToggle } from "./components/shell";
 import { useActiveSection } from "./components/use-active-section";
 import {
   adaptations,
-  branches,
+  branchesFor,
   bumps,
-  failures,
+  failuresFor,
   project,
   sections,
   sectionIds,
@@ -37,6 +37,9 @@ function Guide() {
   const active = useActiveSection(sectionIds);
   const { config } = useConfig();
   const stages = stagesFor(config);
+  const branches = branchesFor(config);
+  const failures = failuresFor(config);
+  const { releaseBranch, devBranch, buildDir, packageManager } = config;
 
   return (
     <>
@@ -87,18 +90,24 @@ function Guide() {
               <ShellToggle />
 
               <Steps>
-                <Step title="Put the files in place">
+                <Step title="Create the two files">
+                  <p>
+                    Copy each file with the button beside its name and paste it
+                    into <code>.github/workflows/</code> at the root of your
+                    repository, keeping the filenames.
+                  </p>
                   <PlatformCommandBlock
                     unix={[
                       { kind: "command", text: "mkdir -p .github/workflows" },
                       {
                         kind: "comment",
-                        text: "# then move the two downloaded files into it",
+                        text: "# paste each file into its own editor tab, then save as:",
                       },
                       {
-                        kind: "command",
-                        text: "mv ~/Downloads/release.yml ~/Downloads/ci.yml .github/workflows/",
+                        kind: "comment",
+                        text: "#   .github/workflows/release.yml",
                       },
+                      { kind: "comment", text: "#   .github/workflows/ci.yml" },
                     ]}
                     windows={[
                       {
@@ -107,22 +116,18 @@ function Guide() {
                       },
                       {
                         kind: "comment",
-                        text: "# then move the two downloaded files into it",
+                        text: "# paste each file into its own editor tab, then save as:",
                       },
                       {
-                        kind: "command",
-                        text: "Move-Item $HOME\\Downloads\\release.yml, $HOME\\Downloads\\ci.yml .github\\workflows\\",
+                        kind: "comment",
+                        text: "#   .github\\workflows\\release.yml",
                       },
+                      { kind: "comment", text: "#   .github\\workflows\\ci.yml" },
                     ]}
                   />
-                </Step>
-
-                <Step title="Read the header comment">
                   <p>
-                    Each file opens with a line recording what it was generated
-                    for. If any of it looks wrong, change the settings above and
-                    download again rather than editing the YAML — the two files
-                    have to agree with each other.
+                    Both files must agree with each other, so change the settings
+                    above and copy again rather than editing one of them by hand.
                   </p>
                 </Step>
 
@@ -130,7 +135,8 @@ function Guide() {
                   <p>
                     The Run workflow button only appears when{" "}
                     <code>release.yml</code> is on your repository's default
-                    branch. Push it there before looking for it.
+                    branch — <code>{releaseBranch}</code>, if that is what you
+                    set above. Push it there before looking for it.
                   </p>
                   <CommandBlock
                     lines={[
@@ -147,8 +153,8 @@ function Guide() {
 
               <Note label="One permission to check" tone="warn">
                 <p>
-                  The release job pushes a version commit back to your release
-                  branch. If that branch is protected, add{" "}
+                  The release job pushes a version commit back to{" "}
+                  <code>{releaseBranch}</code>. If that branch is protected, add{" "}
                   <code>github-actions</code> as a bypass under Settings →
                   Branches, or the push fails at the last step with the tag
                   already built.
@@ -173,8 +179,9 @@ function Guide() {
                 The release workflow checks out{" "}
                 <strong>the release branch no matter which branch you launch
                 it from</strong>, so running it while sitting on{" "}
-                <code>develop</code> still releases <code>main</code>. Merge
-                first — the workflow will not pick up unmerged work.
+                <code>{devBranch}</code> still releases{" "}
+                <code>{releaseBranch}</code>. Merge first — the workflow will not
+                pick up unmerged work.
               </p>
             </Section>
 
@@ -183,8 +190,14 @@ function Guide() {
                 <Step title="Get your work onto the release branch">
                   <CommandBlock
                     lines={[
-                      { kind: "command", text: "git branch -f main develop" },
-                      { kind: "command", text: "git push origin main" },
+                      {
+                        kind: "command",
+                        text: `git branch -f ${releaseBranch} ${devBranch}`,
+                      },
+                      {
+                        kind: "command",
+                        text: `git push origin ${releaseBranch}`,
+                      },
                       { kind: "blank" },
                       {
                         kind: "comment",
@@ -195,7 +208,8 @@ function Guide() {
                   />
                   <p>
                     <code>git branch -f</code> is safe when{" "}
-                    <code>main</code> is an ancestor of <code>develop</code> — it
+                    <code>{releaseBranch}</code> is an ancestor of{" "}
+                    <code>{devBranch}</code> — it
                     moves a pointer forward rather than rewriting history. A red
                     CI run means the release will die partway, so fix it first.
                   </p>
@@ -232,7 +246,9 @@ function Guide() {
               />
               <p>
                 The version lives in <code>package.json</code> and is bumped by{" "}
-                <code>npm version</code> inside the workflow. Don't edit it by
+                <code>npm version</code> inside the workflow — always npm, even
+                on {packageManager === "npm" ? "yarn or pnpm" : packageManager}.
+                Don't edit it by
                 hand — you'd desync the file from the tags.
               </p>
             </Section>
@@ -268,27 +284,31 @@ function Guide() {
               <p>
                 The workflow pushes a commit back to the release branch, so your
                 local clone is now behind. Pull it down and carry the version
-                bump back into <code>develop</code>, or the two branches disagree
+                bump back into <code>{devBranch}</code>, or the two branches
+                disagree
                 about what version this is.
               </p>
               <CommandBlock
                 lines={[
                   {
                     kind: "command",
-                    text: "git checkout main && git pull origin main",
+                    text: `git checkout ${releaseBranch} && git pull origin ${releaseBranch}`,
                   },
                   {
                     kind: "command",
-                    text: "git checkout develop && git merge main",
+                    text: `git checkout ${devBranch} && git merge ${releaseBranch}`,
                   },
-                  { kind: "command", text: "git push origin develop" },
+                  {
+                    kind: "command",
+                    text: `git push origin ${devBranch}`,
+                  },
                 ]}
               />
               <p>
                 You get a tag <code>vX.Y.Z</code>, a GitHub Release with an
                 auto-generated changelog, and{" "}
-                <code>dist-vX.Y.Z.zip</code> attached — the built output, ready
-                to hand to whatever serves it.
+                <code>{buildDir}-vX.Y.Z.zip</code> attached — the built output,
+                ready to hand to whatever serves it.
               </p>
             </Section>
 

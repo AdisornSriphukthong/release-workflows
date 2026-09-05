@@ -49,16 +49,19 @@ export const files = [
   },
 ];
 
-export const branches = [
-  {
-    name: "develop",
-    role: "Day-to-day work. Features merge here. Never released from.",
-  },
-  {
-    name: "main",
-    role: "Stable, and the repository's default branch. Every tag points at a commit on this branch.",
-  },
-];
+/** The two branches the workflows watch, named the way the reader set them. */
+export function branchesFor(config: WorkflowConfig) {
+  return [
+    {
+      name: config.devBranch,
+      role: "Day-to-day work. Features merge here. Never released from.",
+    },
+    {
+      name: config.releaseBranch,
+      role: "Stable, and the repository's default branch. Every tag points at a commit on this branch.",
+    },
+  ];
+}
 
 export const bumps = [
   {
@@ -179,30 +182,39 @@ export const adaptations = [
   },
 ];
 
-export const failures = [
-  {
-    symptom: "No “Run workflow” button",
-    cause:
-      "release.yml is not on the repository's default branch. workflow_dispatch reads it from there and nowhere else — merge it in and push.",
-  },
-  {
-    symptom: "Fails while installing dependencies",
-    cause:
-      "Your lockfile disagrees with package.json — every install command here refuses to update it. Install locally with the manager PACKAGE_MANAGER names and commit the lockfile. Mixing managers in one project causes exactly this.",
-  },
-  {
-    symptom: "Fails at the build, works on your machine",
-    cause:
-      "Usually filename casing. macOS and Windows are case-insensitive, the Linux runner is not, so an import of ./app resolves locally while git has the file recorded as App.tsx. Rename through a temporary name so git records it: git mv App.tsx tmp.tsx && git mv tmp.tsx app.tsx.",
-  },
-  {
-    symptom: "Permission denied on the push",
-    cause:
-      "The job needs permissions: contents: write, and the branch must not be protected against the Actions bot. Add github-actions as a bypass, or release from an unprotected branch.",
-  },
-  {
-    symptom: "Two releases at once",
-    cause:
-      "Can't happen — the concurrency: release group queues the second run rather than racing it.",
-  },
-];
+const LOCKFILE: Record<string, string> = {
+  npm: "package-lock.json",
+  yarn: "yarn.lock",
+  pnpm: "pnpm-lock.yaml",
+};
+
+/** Failure modes, described with the reader's own manager and branch names. */
+export function failuresFor(config: WorkflowConfig) {
+  const pm = config.packageManager;
+  const lockfile = LOCKFILE[pm];
+
+  return [
+    {
+      symptom: "No “Run workflow” button",
+      cause: `release.yml is not on the repository's default branch. workflow_dispatch reads it from there and nowhere else — merge it into ${config.releaseBranch} and push.`,
+    },
+    {
+      symptom: `Fails at ${INSTALL_COMMAND[pm].split(" ").slice(0, 2).join(" ")}`,
+      cause: `${lockfile} disagrees with package.json — the install command refuses to update it. Run ${pm} install locally and commit ${lockfile}. Installing with a different package manager causes exactly this.`,
+    },
+    {
+      symptom: "Fails at the build, works on your machine",
+      cause:
+        "Usually filename casing. macOS and Windows are case-insensitive, the Linux runner is not, so an import of ./app resolves locally while git has the file recorded as App.tsx. Rename through a temporary name so git records it: git mv App.tsx tmp.tsx && git mv tmp.tsx app.tsx.",
+    },
+    {
+      symptom: "Permission denied on the push",
+      cause: `The job needs permissions: contents: write, and ${config.releaseBranch} must not be protected against the Actions bot. Add github-actions as a bypass, or release from an unprotected branch.`,
+    },
+    {
+      symptom: "Two releases at once",
+      cause:
+        "Can't happen — the concurrency: release group queues the second run rather than racing it.",
+    },
+  ];
+}
