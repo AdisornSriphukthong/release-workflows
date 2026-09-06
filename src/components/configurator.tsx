@@ -119,16 +119,16 @@ function CopyIcon({ done }: { done: boolean }) {
       fill="none"
       stroke="currentColor"
       strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      strokeLinecap="square"
+      strokeLinejoin="miter"
       aria-hidden="true"
     >
       {done ? (
         <polyline points="3 8.5 6.5 12 13 4" />
       ) : (
         <>
-          <rect x="5.5" y="5.5" width="8" height="8" rx="1.6" />
-          <path d="M10.5 3.5V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.5" />
+          <rect x="5.5" y="5.5" width="8" height="8" />
+          <path d="M10.5 3.5V1.5H1.5v9h2" />
         </>
       )}
     </svg>
@@ -144,8 +144,8 @@ function DownloadIcon() {
       fill="none"
       stroke="currentColor"
       strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      strokeLinecap="square"
+      strokeLinejoin="miter"
       aria-hidden="true"
     >
       <path d="M8 1.8v8.2" />

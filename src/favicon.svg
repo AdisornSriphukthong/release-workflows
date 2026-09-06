@@ -3,7 +3,8 @@
   bump into a tagged release. Drawn by hand rather than exported, so it stays
   a few hundred bytes and reads at 16px.
 
-  Monochrome, like the page: a black badge in light, a white one in dark.
+  Monochrome and square-cornered, like the page: a black badge in light, a
+  white one in dark.
   Firefox and Chrome both honour prefers-color-scheme inside an SVG favicon;
   anything that doesn't just gets the light pair, which is legible either way.
 -->
@@ -14,7 +15,7 @@
       :root { --badge: #f0f0f0; --glyph: #0b0b0b; }
     }
   </style>
-  <rect width="32" height="32" rx="7" fill="var(--badge)" />
+  <rect width="32" height="32" fill="var(--badge)" />
   <g transform="translate(4 4)">
     <path
       d="M4 2h8l8.59 8.59a2 2 0 0 1 0 2.82l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V4a2 2 0 0 1 2-2Z"

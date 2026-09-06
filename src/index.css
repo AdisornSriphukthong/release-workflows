@@ -8,6 +8,9 @@
  * green-versus-red now differ in shape instead. See .note--stop and
  * .icon-btn--failed.
  *
+ * Corners are square throughout — no rule in this file sets border-radius,
+ * and new ones shouldn't either. Every surface is a plain box.
+ *
  * The light palette is the complete set on bare `:root`; the two blocks below
  * only redefine tokens. A colour whose sole definition lives inside a media
  * query never applies in the un-stamped "system" state, which is how a page
@@ -175,7 +178,6 @@ img {
   font-weight: 500;
   padding: 5px 10px;
   border: 1px solid var(--rule-strong);
-  border-radius: 3px;
   color: var(--ink-soft);
   background: var(--surface);
   white-space: nowrap;
@@ -235,7 +237,6 @@ img {
 .index a:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 2px;
 }
 
 @media (width >= 940px) {
@@ -303,7 +304,6 @@ code {
   font-size: 0.875em;
   background: var(--surface-alt);
   padding: 1px 5px;
-  border-radius: 3px;
   color: var(--ink);
   /* Not `word-break: break-word`, which behaves like `overflow-wrap: anywhere`
      and reports a min-content width of one character. Containers then shrink
@@ -335,7 +335,6 @@ code {
   padding: 18px;
   background: var(--surface-alt);
   border: 1px solid var(--rule);
-  border-radius: 6px;
 }
 
 .config-grid {
@@ -371,7 +370,6 @@ code {
   font-size: 13.5px;
   padding: 8px 10px;
   border: 1px solid var(--rule-strong);
-  border-radius: 4px;
   background: var(--surface);
   color: var(--ink);
   min-width: 0;
@@ -423,7 +421,6 @@ code {
   overflow: auto;
   background: var(--ground);
   border: 1px solid var(--rule);
-  border-radius: 4px;
   font-family: var(--mono);
   font-size: 12px;
   line-height: 1.65;
@@ -459,7 +456,6 @@ code {
   padding: 15px 16px;
   background: var(--surface);
   border: 1px solid var(--rule);
-  border-radius: 5px;
   box-shadow: var(--shadow);
 }
 
@@ -510,7 +506,6 @@ code {
   flex: none;
   padding: 0;
   border: 1px solid var(--rule-strong);
-  border-radius: 4px;
   background: var(--surface);
   color: var(--ink-soft);
   cursor: pointer;
@@ -551,7 +546,6 @@ code {
   gap: 3px;
   background: var(--surface-alt);
   border: 1px solid var(--rule);
-  border-radius: 5px;
 }
 
 .toggle-option {
@@ -560,7 +554,6 @@ code {
   font-weight: 500;
   padding: 6px 11px;
   border: 0;
-  border-radius: 3px;
   background: transparent;
   color: var(--ink-soft);
   cursor: pointer;
@@ -586,7 +579,6 @@ code {
   background: var(--surface);
   border: 1px solid var(--rule);
   border-left: 3px solid var(--accent);
-  border-radius: 4px;
   padding: 14px 16px;
   overflow-x: auto;
   box-shadow: var(--shadow);
@@ -637,7 +629,6 @@ code {
   font-family: var(--mono);
   font-size: 13px;
   font-weight: 600;
-  border-radius: 50%;
 }
 
 .step-body {
@@ -652,7 +643,6 @@ code {
 .pipeline {
   background: var(--surface);
   border: 1px solid var(--rule);
-  border-radius: 5px;
   overflow: hidden;
   box-shadow: var(--shadow);
 }
@@ -706,7 +696,6 @@ code {
 .table-wrap {
   overflow-x: auto;
   border: 1px solid var(--rule);
-  border-radius: 5px;
   background: var(--surface);
   box-shadow: var(--shadow);
 }
@@ -755,7 +744,6 @@ tbody td:first-child {
   flex-direction: column;
   gap: 7px;
   padding: 15px 17px;
-  border-radius: 4px;
   border: 1px solid var(--rule-strong);
   background: var(--surface);
 }
@@ -791,7 +779,6 @@ tbody td:first-child {
 .note--stop .note-label {
   align-self: flex-start;
   padding: 3px 7px;
-  border-radius: 3px;
   background: var(--ink);
   color: var(--ground);
 }
